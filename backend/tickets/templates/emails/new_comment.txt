@@ -1,0 +1,15 @@
+[CUTS] New comment on Ticket #{{ ticket.id }}: {{ ticket.title }}
+
+Hello,
+
+{{ commenter }} added a new comment.
+
+Comment:
+{{ comment.content|truncatewords:100 }}
+
+View the ticket: {{ ticket_url }}
+
+Reply to this email to add a comment.
+
+Best regards,
+CUTS Helpdesk

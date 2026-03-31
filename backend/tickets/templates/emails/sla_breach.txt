@@ -1,0 +1,16 @@
+SLA BREACH Notification
+
+Ticket #{{ ticket.id }}: {{ ticket.title }}
+
+{{ sla_type|title }} SLA has been BREACHED.
+Priority: {{ ticket.get_priority_display }}
+Status: {{ ticket.get_status_display }}
+Breached Deadline: {{ due_date|date:"Y-m-d H:i" }}
+Impact: {{ ticket.get_impact_display }} | Urgency: {{ ticket.get_urgency_display }}
+
+Take IMMEDIATE action.
+
+View Ticket: {{ ticket_url }}
+
+--
+CUTS Helpdesk System

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SLA Breached - Ticket #{{ ticket.id }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <h2 style="color: #dc3545;">🚨 SLA BREACH Notification</h2>
+    <p>Dear Agent,</p>
+    <p>The following ticket has <strong>breached its {{ sla_type|title }} SLA deadline</strong>.</p>
+    
+    <div style="background: #f8d7da; padding: 20px; border-left: 4px solid #dc3545;">
+        <p><strong>Ticket #{{ ticket.id }}:</strong> <a href="{{ ticket_url }}">{{ ticket.title }}</a></p>
+        <p><strong>Priority:</strong> {{ ticket.get_priority_display }}</p>
+        <p><strong>Status:</strong> {{ ticket.get_status_display }}</p>
+        <p><strong>Breached Deadline:</strong> {{ due_date|date:"Y-m-d H:i" }}</p>
+        <p><strong>Impact:</strong> {{ ticket.get_impact_display }} | <strong>Urgency:</strong> {{ ticket.get_urgency_display }}</p>
+    </div>
+    
+    <p>Please take <strong>immediate action</strong>.</p>
+    <p><a href="{{ ticket_url }}" style="background: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Ticket NOW</a></p>
+    
+    <hr>
+    <small>CUTS Helpdesk System</small>
+</body>
+</html>

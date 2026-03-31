@@ -1,0 +1,16 @@
+SLA Approaching Notification
+
+Ticket #{{ ticket.id }}: {{ ticket.title }}
+
+{{ sla_type|title }} SLA is approaching soon.
+Priority: {{ ticket.get_priority_display }}
+Status: {{ ticket.get_status_display }}
+Due Date: {{ due_date|date:"Y-m-d H:i" }}
+Impact: {{ ticket.get_impact_display }} | Urgency: {{ ticket.get_urgency_display }}
+
+Please prioritize this ticket.
+
+View Ticket: {{ ticket_url }}
+
+--
+CUTS Helpdesk System

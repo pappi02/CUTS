@@ -1,0 +1,17 @@
+SLA BREACH ESCALATION
+
+Supervisor: {{ supervisor.get_full_name|default:supervisor.email }}
+
+Ticket #{{ ticket.id }}: {{ ticket.title }} ({{ ticket.assigned_group }})
+
+{{ sla_type|title }} SLA BREACHED.
+Priority: {{ ticket.get_priority_display }}
+Status: {{ ticket.get_status_display }}
+Breached: {{ due_date|date:"Y-m-d H:i" }}
+
+Please review/escalate.
+
+{{ ticket_url }}
+
+--
+CUTS Helpdesk - Auto-escalation

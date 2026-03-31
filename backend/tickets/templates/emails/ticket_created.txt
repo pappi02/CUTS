@@ -1,0 +1,19 @@
+[CUTS] Ticket #{{ ticket.id }}: {{ ticket.title }}
+
+Dear {{ ticket.requester.username }},
+
+Your ticket has been created successfully.
+
+Status: {{ ticket.get_status_display }}
+Priority: {{ ticket.get_priority_display }}
+Category: {{ ticket.category }}
+
+Description:
+{{ ticket.description|truncatewords:100 }}
+
+View your ticket: {{ ticket_url }}
+
+You will be notified when an agent responds. Reply to this email to add a comment.
+
+Best regards,
+CUTS Helpdesk
