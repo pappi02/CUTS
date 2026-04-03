@@ -22,10 +22,24 @@ class Command(BaseCommand):
             'Campus Information',
         ]
         for name in cat_names:
-            cat, created = Category.objects.get_or_create(name=name, defaults={'is_active': True})
+            # Prefer existing top-level active category, else create new top-level
+            cat = Category.objects.filter(
+                name__iexact=name, 
+                parent__isnull=True, 
+                is_active=True
+            ).first()
+            if not cat:
+                cat, created = Category.objects.get_or_create(
+                    name=name, 
+                    parent=None,
+                    defaults={'is_active': True}
+                )
+                if created:
+                    self.stdout.write(self.style.SUCCESS(f'Created category: {name}'))
+            else:
+                created = False
+                self.stdout.write(f'Using existing category: {name}')
             categories[name] = cat
-            if created:
-                self.stdout.write(f'Created category: {name}')
 
         # Get an admin user (or create a dummy one)
         admin = User.objects.filter(is_superuser=True).first()
