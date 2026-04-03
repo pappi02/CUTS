@@ -7,8 +7,35 @@ from django.views.decorators.http import require_http_methods
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from tickets.models import Ticket, TicketComment
+from rest_framework import viewsets, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from .models import Notification
+from .serializers import NotificationSerializer
 
 logger = logging.getLogger(__name__)
+
+
+class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def mark_read(self, request, pk=None):
+        notification = self.get_object()
+        notification.mark_as_read()
+        return Response({'status': 'marked as read'})
+
+    @action(detail=False, methods=['post'])
+    def mark_all_read(self, request):
+        self.get_queryset().update(is_read=True)
+        return Response({'status': 'all marked as read'})
+
 
 @csrf_exempt
 @require_http_methods(["POST"])

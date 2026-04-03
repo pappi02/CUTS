@@ -17,17 +17,22 @@ import {
   Paper,
   IconButton,
   InputAdornment,
+  useMediaQuery,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import Search as SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
 import { setFilter, clearFilters } from '../../../store/slices/ticketSlice';
+import { toggleFilterSidebar } from '../../../store/slices/uiSlice';
 import { useGetCategoriesQuery } from '../ticketsApi';
 
 const FilterSidebar = () => {
   const dispatch = useDispatch();
   const filters = useSelector((state) => state.tickets.filters);
+  const filterSidebarOpen = useSelector((state) => state.ui.filterSidebarOpen);
   const { data: categoriesData, isError: categoriesError } = useGetCategoriesQuery();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const categories = Array.isArray(categoriesData) ? categoriesData : [];
 
   const handleChange = (key, value) => {
@@ -46,22 +51,42 @@ const FilterSidebar = () => {
 
   return (
     <Paper className="glass-card" sx={{ 
-      width: 320, 
-      p: 3, 
-      height: '100vh', 
+      width: { xs: '100%', md: 320 }, 
+      p: { xs: 2, md: 3 }, 
+      minHeight: { xs: 'auto', md: 'calc(100vh - 140px)' }, 
+      maxHeight: { xs: 'none', md: 'calc(100vh - 140px)' },
       overflow: 'auto',
-      borderRight: 'none',
-      boxShadow: '10px 0 30px rgba(0,0,0,0.3)',
-      position: 'sticky',
-      top: 0,
+      borderRight: { xs: 'none', md: '1px solid rgba(148, 163, 184, 0.2)' },
+      boxShadow: { xs: 'none', md: '10px 0 30px rgba(0,0,0,0.3)' },
+      position: { xs: filterSidebarOpen ? 'fixed' : 'absolute', md: 'sticky' },
+      top: { xs: 0, md: '88px' },
+      left: { xs: 0 },
+      right: { xs: 0 },
+      zIndex: { xs: 1000, md: 'auto' },
+      mb: { xs: 3, md: 0 },
+      borderRadius: { xs: 'var(--radius-lg)', md: 0 },
+      display: { xs: filterSidebarOpen ? 'block' : 'none', md: 'block' },
+      backdropFilter: { xs: 'blur(4px)', md: 'none' },
+      backgroundColor: { xs: 'rgba(255,255,255,0.95)', md: 'inherit' },
     }}>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" fontWeight={700} gutterBottom color="primary.main">
-          🔍 Advanced Filters
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {activeFiltersCount} active filters
-        </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="h5" fontWeight={700} gutterBottom color="primary.main">
+            🔍 Advanced Filters
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {activeFiltersCount} active filters
+          </Typography>
+        </Box>
+        {isMobile && (
+          <IconButton 
+            size="small" 
+            onClick={() => dispatch(toggleFilterSidebar())}
+            sx={{ color: 'text.secondary', mt: -1 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
       </Box>
 
       {/* Search */}

@@ -43,7 +43,7 @@ class Category(MPTTModel):
 class AssignmentGroup(models.Model):
     name = models.CharField(max_length=255)
     code = models.CharField(max_length=10)
-    school = models.ForeignKey(School, on_delete=models.CASCADE)
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=True, blank=True, help_text="Leave blank for campus-wide support groups")
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True)

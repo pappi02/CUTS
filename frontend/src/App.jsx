@@ -1,11 +1,17 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import AuthGuard from './components/AuthGuard';
 import RoleGuard from './components/RoleGuard';
 import AppLayout from './components/AppLayout';
 import ScrollRestoration from './components/ScrollRestoration';
+import ScrollToTop from './components/ScrollToTop';
 import AdminLayout from './features/admin/AdminLayout';
 import Login from './features/auth/Login';
 import Dashboard from './features/dashboard/Dashboard';
+import StudentDashboard from './features/dashboard/StudentDashboard';
+import StaffDashboard from './features/dashboard/StaffDashboard';
+import AdminOverviewDashboard from './features/dashboard/AdminOverviewDashboard';
 import TicketList from './features/tickets/TicketList';
 import TicketDetail from './features/tickets/TicketDetail';
 import TicketCreate from './features/tickets/TicketCreate';
@@ -14,10 +20,50 @@ import KnowledgeBaseArticle from './features/knowledgebase/KnowledgeBaseArticle'
 import KnowledgeBaseEditor from './features/knowledgebase/KnowledgeBaseEditor';
 import Reports from './features/reports/Reports';
 import Profile from './features/profile/Profile';
+import { updateActivity, selectUser, setUser, clearUser } from './store/slices/authSlice';
+import { fetchProfile } from './services/auth';
 
 function App() {
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
+
+  useEffect(() => {
+    // Check if user is persisted and verify with server
+    const persistedUser = localStorage.getItem('user');
+    if (persistedUser && !user) {
+      fetchProfile()
+        .then(response => {
+          dispatch(setUser(response.data));
+        })
+        .catch(() => {
+          dispatch(clearUser());
+        });
+    }
+  }, [user, dispatch]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const handleActivity = () => {
+      dispatch(updateActivity());
+    };
+
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+
+    events.forEach(event => {
+      document.addEventListener(event, handleActivity, true);
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleActivity, true);
+      });
+    };
+  }, [user, dispatch]);
+
   return (
     <ScrollRestoration>
+      <ScrollToTop />
       <Routes>
       <Route path="/login" element={<Login />} />
 
@@ -29,6 +75,42 @@ function App() {
             <AppLayout>
               <Dashboard />
             </AppLayout>
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/student-dashboard"
+        element={
+          <AuthGuard>
+            <RoleGuard allowedRoles={['student']}>
+              <AppLayout>
+                <StudentDashboard />
+              </AppLayout>
+            </RoleGuard>
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/staff-dashboard"
+        element={
+          <AuthGuard>
+            <RoleGuard allowedRoles={['staff', 'faculty']}>
+              <AppLayout>
+                <StaffDashboard />
+              </AppLayout>
+            </RoleGuard>
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/admin-dashboard"
+        element={
+          <AuthGuard>
+            <RoleGuard allowedRoles={['admin']}>
+              <AppLayout>
+                <AdminOverviewDashboard />
+              </AppLayout>
+            </RoleGuard>
           </AuthGuard>
         }
       />

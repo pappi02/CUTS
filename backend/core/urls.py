@@ -7,9 +7,13 @@ from .views import (
     AssignmentGroupViewSet,
     CategoryListView,
     SchoolListView,
+    AdminHealthView,
+    AdminMetricsView,
 )
 
 urlpatterns = [
     path('schools/', SchoolListView.as_view(), name='school-list'),
     path('categories/', CategoryListView.as_view(), name='category-list'),
+    path('admin/health/', AdminHealthView.as_view(), name='admin-health'),
+    path('admin/metrics/', AdminMetricsView.as_view(), name='admin-metrics'),
 ]

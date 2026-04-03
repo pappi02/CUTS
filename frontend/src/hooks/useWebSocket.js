@@ -17,7 +17,7 @@ const useWebSocket = () => {
     }
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = import.meta.env.VITE_WS_HOST || window.location.host;
+    const wsHost = import.meta.env.VITE_WS_HOST || 'localhost:8000';
     const wsUrl = `${protocol}//${wsHost}/ws/notifications/`;
     
     console.log('Connecting WS to:', wsUrl);

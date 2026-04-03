@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-    server: {
+  server: {
     port: 3000,
     proxy: {
       '/api': {
@@ -14,10 +14,10 @@ export default defineConfig({
       '/media': 'http://localhost:8000',
       '/static': 'http://localhost:8000',
       '/ws': {
-        target: 'ws://localhost:8001',
+        target: 'ws://localhost:8000',
         ws: true,
+        rewriteWsOrigin: true,
       },
-
     },
   },
 })

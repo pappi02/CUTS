@@ -23,7 +23,6 @@ class KBPermission(permissions.BasePermission):
 
 
 class ArticleListCreateView(generics.ListCreateAPIView):
-    queryset = Article.objects.select_related('category', 'author').filter(is_published=True)
     serializer_class = ArticleListSerializer
     pagination_class = StandardResultsSetPagination
     filter_backends = [
@@ -36,6 +35,32 @@ class ArticleListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-updated_at']
     permission_classes = [KBPermission]
+
+    def get_queryset(self):
+        queryset = Article.objects.select_related('category', 'author').filter(is_published=True)
+        user = self.request.user
+        
+        # Filter based on user role and article audience
+        if user and user.is_authenticated:
+            user_role = getattr(user, 'role', None)
+            
+            # Students can see 'all' and 'student' articles
+            if user_role == 'student':
+                queryset = queryset.filter(Q(audience='all') | Q(audience='student'))
+            # Staff and faculty can see 'all' and 'staff' articles
+            elif user_role in ['staff', 'faculty']:
+                queryset = queryset.filter(Q(audience='all') | Q(audience='staff'))
+            # Admins can see all articles
+            elif user_role == 'admin' or user.is_staff or user.is_superuser:
+                pass  # No additional filtering needed
+            else:
+                # Default: only 'all' articles for unknown roles
+                queryset = queryset.filter(audience='all')
+        else:
+            # Anonymous users can only see 'all' articles
+            queryset = queryset.filter(audience='all')
+            
+        return queryset
 
     def get_serializer_class(self):
         if self.request.method == 'LIST':

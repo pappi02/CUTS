@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import useWebSocket from '../hooks/useWebSocket';
 import { useInactivityLogout } from '../hooks/useInactivityLogout';
 import NotificationToast from './NotificationToast';
-import { toggleSidebar, setShowScrollToTop, scrollToTop } from '../store/slices/uiSlice';
+import { toggleSidebar, setShowScrollToTop, scrollToTop, setSidebarOpen } from '../store/slices/uiSlice';
 import ProfileDropdown from './ProfileDropdown';
 import {
   Box,
@@ -61,15 +61,36 @@ const AppLayout = ({ children }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []); 
 
+  // Initialize sidebar state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      const isDesktop = window.innerWidth >= 600; // sm breakpoint
+      // Only auto-adjust on resize, not on every state change
+      if (isDesktop) {
+        dispatch(setSidebarOpen(true));
+      } else {
+        dispatch(setSidebarOpen(false));
+      }
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Listen for window resize
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [dispatch]); // Remove sidebarOpen from dependencies 
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
         <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
+          width: { xs: '100%', sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { xs: 0, sm: `${drawerWidth}px` },
           height: { xs: 64, sm: 72 },
+          zIndex: { xs: 1300, sm: 'auto' }, // Ensure AppBar is above mobile sidebar
         }}
       >
         <Toolbar>
@@ -92,11 +113,77 @@ const AppLayout = ({ children }) => {
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
       >
+        {/* Mobile Sidebar - Custom implementation to avoid aria-hidden issues */}
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: drawerWidth,
+            height: '100vh',
+            backgroundColor: 'background.paper',
+            transform: sidebarOpen ? 'translateX(0)' : `translateX(-${drawerWidth}px)`,
+            transition: 'transform 0.3s ease-in-out',
+            zIndex: 1200,
+            display: { xs: 'block', sm: 'none' },
+            boxShadow: sidebarOpen ? 4 : 0,
+          }}
+        >
+          <Toolbar />
+          <Divider />
+          <List>
+            <ListItem button component={Link} to="/dashboard" onClick={() => dispatch(setSidebarOpen(false))}>
+              <ListItemIcon><DashboardIcon /></ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ListItem>
+            <ListItem button component={Link} to="/tickets" onClick={() => dispatch(setSidebarOpen(false))}>
+              <ListItemIcon><TicketIcon /></ListItemIcon>
+              <ListItemText primary="My Tickets" />
+            </ListItem>
+            <ListItem button component={Link} to="/tickets/new" onClick={() => dispatch(setSidebarOpen(false))}>
+              <ListItemIcon><TicketIcon /></ListItemIcon>
+              <ListItemText primary="New Ticket" />
+            </ListItem>
+            <ListItem button component={Link} to="/knowledgebase" onClick={() => dispatch(setSidebarOpen(false))}>
+              <ListItemIcon><ArticleIcon /></ListItemIcon>
+              <ListItemText primary="Knowledge Base" />
+            </ListItem>
+            {(user?.role === 'staff' || user?.role === 'faculty' || user?.role === 'admin') && (
+              <ListItem button component={Link} to="/reports" onClick={() => dispatch(setSidebarOpen(false))}>
+                <ListItemIcon><BarChartIcon /></ListItemIcon>
+                <ListItemText primary="Reports" />
+              </ListItem>
+            )}
+            {user?.role === 'admin' && (
+              <ListItem button component={Link} to="/admin" onClick={() => dispatch(setSidebarOpen(false))}>
+                <ListItemIcon><AdminIcon /></ListItemIcon>
+                <ListItemText primary="Admin Panel" />
+              </ListItem>
+            )}
+          </List>
+        </Box>
+
+        {/* Mobile Backdrop */}
+        {sidebarOpen && (
+          <Box
+            onClick={() => dispatch(setSidebarOpen(false))}
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 1199,
+              display: { xs: 'block', sm: 'none' },
+            }}
+          />
+        )}
         <Drawer
           variant="persistent"
           open={sidebarOpen}
           sx={{
-            display: { xs: 'block', sm: 'block' },
+            display: { xs: 'none', sm: 'block' },
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
         >
@@ -109,7 +196,7 @@ const AppLayout = ({ children }) => {
             </ListItem>
             <ListItem button component={Link} to="/tickets">
               <ListItemIcon><TicketIcon /></ListItemIcon>
-              <ListItemText primary="Tickets" />
+              <ListItemText primary="My Tickets" />
             </ListItem>
             <ListItem button component={Link} to="/tickets/new">
               <ListItemIcon><TicketIcon /></ListItemIcon>
@@ -119,14 +206,18 @@ const AppLayout = ({ children }) => {
               <ListItemIcon><ArticleIcon /></ListItemIcon>
               <ListItemText primary="Knowledge Base" />
             </ListItem>
-            <ListItem button component={Link} to="/reports">
-              <ListItemIcon><BarChartIcon /></ListItemIcon>
-              <ListItemText primary="Reports" />
-            </ListItem>
-            <ListItem button component={Link} to="/admin">
-              <ListItemIcon><AdminIcon /></ListItemIcon>
-              <ListItemText primary="Admin" />
-            </ListItem>
+            {(user?.role === 'staff' || user?.role === 'faculty' || user?.role === 'admin') && (
+              <ListItem button component={Link} to="/reports">
+                <ListItemIcon><BarChartIcon /></ListItemIcon>
+                <ListItemText primary="Reports" />
+              </ListItem>
+            )}
+            {user?.role === 'admin' && (
+              <ListItem button component={Link} to="/admin">
+                <ListItemIcon><AdminIcon /></ListItemIcon>
+                <ListItemText primary="Admin Panel" />
+              </ListItem>
+            )}
           </List>
         </Drawer>
       </Box>
@@ -135,10 +226,11 @@ const AppLayout = ({ children }) => {
         sx={{
           flexGrow: 1,
           p: { xs: 2, sm: 3, md: 4 },
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: { xs: '100%', sm: `calc(100% - ${drawerWidth}px)` },
           mt: { xs: '64px', sm: '72px' },
           minHeight: '100vh',
-background: 'linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.8) 30%)',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.8) 30%)',
+          overflow: 'auto',
         }}
       >
         {children}

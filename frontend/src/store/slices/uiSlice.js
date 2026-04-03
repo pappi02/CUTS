@@ -2,7 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   theme: 'light', // or 'dark'
-  sidebarOpen: true,
+  sidebarOpen: true, // Will be set appropriately in the component
+  filterSidebarOpen: false, // Filter sidebar starts closed on mobile
   notifications: [], // for in-app notifications (toasts)
   lastActivity: Date.now(),
   inactivityTimer: 0,
@@ -25,6 +26,12 @@ const uiSlice = createSlice({
     },
     setSidebarOpen: (state, action) => {
       state.sidebarOpen = action.payload;
+    },
+    toggleFilterSidebar: (state) => {
+      state.filterSidebarOpen = !state.filterSidebarOpen;
+    },
+    setFilterSidebarOpen: (state, action) => {
+      state.filterSidebarOpen = action.payload;
     },
     addNotification: (state, action) => {
       state.notifications.unshift(action.payload);
@@ -64,6 +71,8 @@ export const {
   setTheme,
   toggleSidebar,
   setSidebarOpen,
+  toggleFilterSidebar,
+  setFilterSidebarOpen,
   addNotification,
   markNotificationRead,
   removeNotification,

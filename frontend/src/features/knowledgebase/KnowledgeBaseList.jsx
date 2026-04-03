@@ -124,7 +124,7 @@ const KnowledgeBaseList = () => {
                         <ListItemText
                           primary={article.title}
                           secondary={
-                            <>
+                            <Box>
                               <Typography variant="body2" color="text.secondary">
                                 {article.excerpt || (article.content || '').substring(0, 100)}...
                               </Typography>
@@ -135,7 +135,7 @@ const KnowledgeBaseList = () => {
                                   sx={{ mt: 1 }}
                                 />
                               )}
-                            </>
+                            </Box>
                           }
                         />
                         {canEdit && (

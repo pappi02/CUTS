@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Grid, Box, Typography, Alert, CircularProgress } from '@mui/material';
+import { Grid, Box, Typography, Alert, CircularProgress, IconButton, useTheme, useMediaQuery } from '@mui/material';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { useGetTicketsQuery } from './ticketsApi';
 import { setPage, setPageSize, getFilteredParams } from '../../store/slices/ticketSlice';
+import { toggleFilterSidebar } from '../../store/slices/uiSlice';
 import { useDebounce } from '../../hooks/useDebounce';
 import FilterSidebar from './components/FilterSidebar';
 import TicketTable from './components/TicketTable';
@@ -10,6 +12,8 @@ import TicketTable from './components/TicketTable';
 const TicketList = () => {
   const dispatch = useDispatch();
   const filters = useSelector((state) => state.tickets);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const queryParams = useSelector(getFilteredParams);
 
@@ -34,12 +38,12 @@ const TicketList = () => {
   }
 
   return (
-    <Grid container>
+    <Grid container spacing={{ xs: 2, md: 3 }}>
       <Grid item xs={12} md={3}>
         <FilterSidebar />
       </Grid>
       <Grid item xs={12} md={9}>
-        <Box sx={{ p: { xs: 2, md: 3 }, pt: 0 }}>
+        <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, pt: 0 }}>
           <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
             Tickets ({data?.count || 0})
           </Typography>
